@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Диагностика профиля эксперта</title>
+<style>
+:root{--bg:#f0f2fb;--card:#fff;--ink:#14183a;--mut:#5d6384;--line:#d5daf0;--ac:#4f35e8;--acs:#e9e5ff;--warn:#c97a00;--goink:#fff;--r:14px}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1124;--card:#171b38;--ink:#eef0ff;--mut:#a2a8cf;--line:#2c3260;--ac:#9a89ff;--acs:#262b57;--warn:#ffc24d;--goink:#0e1124}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.w{max-width:640px;margin:0 auto;padding:26px 20px 64px;min-height:100vh}
+h1,h2{font-weight:800;line-height:1.15;letter-spacing:-.02em;margin:0 0 14px}
+h1{font-size:clamp(32px,8.5vw,50px);margin-top:12vh}
+h2{font-size:clamp(24px,6vw,32px)}
+h3{font-size:18px;margin:0 0 6px}
+p{margin:0 0 12px}
+.mut{color:var(--mut)}.sm{font-size:14px}
+.btn{display:block;width:100%;padding:16px 18px;border-radius:var(--r);border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;margin:0 0 10px;transition:border-color .15s,background .15s,transform .1s}
+.btn:hover{border-color:var(--ac)}
+.btn:active{transform:scale(.99);background:var(--acs)}
+.go{background:var(--ac);border-color:var(--ac);color:var(--goink);text-align:center;font-weight:700;text-decoration:none;margin-top:6px}
+.go:hover{filter:brightness(1.08);border-color:var(--ac)}
+.lnk{background:none;border:0;color:var(--mut);font:inherit;font-size:15px;cursor:pointer;padding:6px 0;text-decoration:underline}
+.top{display:flex;justify-content:space-between;align-items:center;min-height:30px;margin-bottom:8px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:0 0 30px}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.sec{border-top:1px solid var(--line);padding:22px 0 6px;margin-top:18px}
+.sc{font-size:44px;font-weight:800;color:var(--ac);letter-spacing:-.03em}
+svg{width:100%;height:auto;display:block;margin:4px 0}
+.gl{fill:none;stroke:var(--line)}
+.pl{fill:var(--ac);fill-opacity:.2;stroke:var(--ac);stroke-width:2.5;stroke-linejoin:round}
+.lb{fill:var(--ink);font-size:13px;font-weight:600}
+.wk{fill:var(--warn)}
+.g{animation:gr .8s cubic-bezier(.2,.8,.2,1) both;transform-origin:200px 135px}
+@keyframes gr{from{transform:scale(.15);opacity:0}}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin:8px 0 4px}
+.lg b{color:var(--warn)}
+.fade{animation:fd .25s ease both}
+@keyframes fd{from{opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="w" id="app" aria-live="polite"></main>
+<script>
+const TG="ВАШ_НИК_В_TELEGRAM"; /* без @, например yulianna_smm */
+const AX={p:"Позиционирование",u:"Упаковка профиля",k:"Контент-система",v:"Путь клиента"};
+const SH={p:"Позиционирование",u:"Упаковка",k:"Контент-система",v:"Путь клиента"};
+const Q=[
+["Чем вы занимаетесь?",["Эксперт или консультант","Создаю продукт или онлайн-бизнес","Наёмный специалист, строю личный бренд","Своё дело офлайн","Другое"],""],
+["На каком вы этапе?",["Ещё не начал(а) вести профиль","Веду до 3 месяцев","Веду 3–12 месяцев","Больше года, но без системы"],""],
+["Что хотите получить через полгода?",["Клиентов","Узнаваемость в профессии","Предложения о работе и сотрудничестве","Аудиторию под будущий продукт"],""],
+["Можете за 10 секунд сказать, кому и что вы даёте?",["Да, у меня есть готовая фраза","Примерно, но каждый раз звучит по-разному","Нет"],"p"],
+["Знаете, чем отличаетесь от трёх похожих специалистов?",["Да, могу назвать","Частично","Нет"],"p"],
+["Что сейчас написано в вашем био?",["Кому помогаю, какой результат и что сделать","Только имя или должность","Пусто или давно не менял(а)"],"u"],
+["Как устроены хайлайты и закреплённые посты?",["Структурированы и ведут к действию","Есть, но случайные","Нет"],"u"],
+["Как вы выбираете темы постов?",["По рубрикам и плану вперёд","За день до публикации","Когда есть вдохновение"],"k"],
+["Какие форматы использовали за последний месяц?",["Три и больше: посты, видео, сторис","Один-два","Почти ничего"],"k"],
+["Куда вы ведёте человека после интереса к профилю?",["К одному чёткому действию: запись, рассылка, бот","Ссылка есть, но без понятного действия","Никуда"],"v"],
+["Как часто в ваших постах есть призыв к действию?",["Почти всегда, в разных формах","Иногда","Почти никогда"],"v"],
+["Что мешает вам больше всего?",["Не знаю, что писать","Не хватает времени","Страшно камеры и оценки","Нет результата, пропадает мотивация","Не знаю, как всё связать"],""]
+];
+const LV=["Старт","Каркас","Система"];
+const LT=["Вы в начале, и это хорошая точка: ничего не нужно переделывать. Главная ошибка здесь — чинить всё сразу. Берите одну часть профиля на две недели и начните с самой слабой.","Основа есть, но звенья не связаны: вы делаете много, а результат не накапливается. Доработайте самое слабое звено, и остальное заработает лучше.","У вас уже есть система. Теперь вопрос не в том, что добавить, а в том, что измерять и усиливать."];
+/* [описание, действие] для уровней: 0-1 балла, 2-3 балла, 4 балла */
+const T={
+p:[["Сейчас человеку сложно понять, кому вы нужны и чем отличаетесь, поэтому он листает дальше.","Напишите фразу «Я помогаю [кому] [получить результат] через [как]» в трёх вариантах и покажите трём людям из вашей аудитории. Оставьте тот, который они пересказали без ошибок."],["Основа есть, но она нестабильна.","Выпишите три вещи, которые вы делаете иначе, чем коллеги (метод, опыт, формат), и добавьте одну из них в фразу о себе."],["Сильная сторона.","Следите, чтобы эта фраза звучала одинаково в био, закрепе и первых секундах видео."]],
+u:[["Профиль пока не работает как витрина.","Перепишите био в три строки: кому и какой результат; чем подтверждаете; что сделать и ссылка. Хайлайты: «Обо мне», «Результаты», «Как работать», «Отзывы». В закрепе: знакомство, полезный пост и предложение."],["Упаковка есть, но не ведёт к действию.","Проверьте, понятно ли за 5 секунд, что делать дальше. Если нет, добавьте призыв в третью строку био."],["Сильная сторона.","Раз в квартал перечитывайте био свежим взглядом и обновляйте закреп."]],
+k:[["Контент рождается случайно, отсюда выгорание и нерегулярность.","Возьмите четыре рубрики: польза, кейс или история, процесс, мнение. Раз в неделю выделяйте 90 минут и планируйте минимум два поста вперёд. Заранее принятые решения снижают нагрузку на выбор, а она чаще всего и убивает регулярность."],["Система есть частично.","Добавьте недостающий формат (нет видео — один ролик в неделю) или спланируйте контент на две недели вперёд."],["Сильная сторона.","Смотрите, какой формат даёт сохранения и переходы, и усиливайте его."]],
+v:[["Люди интересуются, но не понимают, что делать дальше.","Выберите одно целевое действие (запись, бесплатный материал или слово в директ), поставьте его в био и в каждый третий пост."],["Путь есть, но он узкий.","Добавьте разные призывы: мягкий («сохраните»), средний («напишите слово»), прямой («запишитесь») и бесплатный материал как первый шаг."],["Сильная сторона.","Считайте конверсию на каждом шаге, чтобы видеть, где теряются люди."]]
+};
+const PR={p:"Воркбук «Кому, что и чем отличаюсь»",u:"Шаблоны профиля: био, хайлайты, закреп",k:"Контент-система на месяц",v:"Мини-воронка из соцсетей"};
+const BT=["Дело чаще не в нехватке идей, а в отсутствии рубрик: четыре рубрики дают десятки тем.","Пишите и снимайте пакетом раз в неделю, а частоту ставьте минимальную: два поста в неделю лучше, чем семь и пропуски.","Начните с форматов без лица: карусели, голос, скринкасты. Страх оценки снижается при повторении, а не при ожидании готовности.","Измеряйте не подписчиков, а действия: сколько человек написали или нажали. Результат появляется, когда есть путь клиента.","Порядок такой: позиционирование, упаковка, контент, призыв. Ваш профиль выше показывает, где разрыв."];
+const GL=["Для клиентов усиливайте призыв и путь клиента.","Для узнаваемости добавьте больше постов с мнением и коллаборации.","Для предложений о работе покажите кейсы и портфолио в хайлайтах.","Для аудитории под продукт заведите бесплатный материал и рассылку."];
+let i=0,a=[];
+const $=document.getElementById("app");
+const lvl=s=>s<=1?0:s<=3?1:2;
+function intro(){
+$.innerHTML=`<div class="fade"><h1>Что мешает вашему профилю приводить клиентов?</h1><p class="mut">Двенадцать вопросов, около трёх минут. В конце вы увидите, какая из четырёх частей профиля сейчас слабее всего, и получите одно действие на неделю.</p><button class="btn go" id="st">Начать диагностику</button></div>`;
+document.getElementById("st").onclick=()=>{i=0;a=[];ask()};
+}
+function ask(){
+const q=Q[i];
+$.innerHTML=`<div class="fade"><div class="top">${i?'<button class="lnk" id="bk">Назад</button>':'<span></span>'}<span class="mut">${i+1} из ${Q.length}</span></div><div class="bar"><i style="width:${i/Q.length*100}%"></i></div><h2>${q[0]}</h2>`+q[1].map((o,j)=>`<button class="btn" data-j="${j}">${o}</button>`).join("")+`</div>`;
+$.querySelectorAll("[data-j]").forEach(b=>b.onclick=()=>{a[i]=+b.dataset.j;i++;i<Q.length?ask():done()});
+const bk=document.getElementById("bk");if(bk)bk.onclick=()=>{i--;ask()};
+window.scrollTo(0,0);
+}
+function done(){
+const s={p:0,u:0,k:0,v:0};
+Q.forEach((q,n)=>{if(q[2])s[q[2]]+=2-a[n]});
+const keys=Object.keys(s),tot=keys.reduce((t,k)=>t+s[k],0),lv=tot<=5?0:tot<=10?1:2;
+const mn=Math.min(...keys.map(k=>s[k])),c=keys.filter(k=>s[k]==mn),pk=a[11]<=2?"k":"v";
+const w=c.length==1?c[0]:c.includes(pk)?pk:c[0];
+const D={p:[0,-1],u:[1,0],k:[0,1],v:[-1,0]},pt=(k,f)=>[200+85*f*D[k][0],135+85*f*D[k][1]];
+const grid=[1,2,3,4].map(n=>`<polygon class="gl" points="${keys.map(k=>pt(k,n/4).join(",")).join(" ")}"/>`).join("");
+const axl=keys.map(k=>`<line class="gl" x1="200" y1="135" x2="${pt(k,1)[0]}" y2="${pt(k,1)[1]}"/>`).join("");
+const poly=keys.map(k=>pt(k,s[k]/4).join(",")).join(" "),wp=pt(w,s[w]/4);
+const svg=`<svg viewBox="0 0 400 262" role="img" aria-label="Профиль по четырём частям">${grid}${axl}<g class="g"><polygon class="pl" points="${poly}"/><circle class="wk" cx="${wp[0]}" cy="${wp[1]}" r="7"/></g><text class="lb" x="200" y="38" text-anchor="middle">${SH.p}</text><text class="lb" x="297" y="140">${SH.u}</text><text class="lb" x="200" y="244" text-anchor="middle">${SH.k}</text><text class="lb" x="103" y="140" text-anchor="end">${SH.v}</text></svg>`;
+const L=lvl(s[w]),t=T[w][L];
+const msg=`Здравствуйте! Прошёл(а) диагностику профиля.\nИтог: ${tot} из 16 (${LV[lv]})\n`+keys.map(k=>`${AX[k]}: ${s[k]} из 4`).join("\n")+`\nТочка роста: ${AX[w]}\nСфера: ${Q[0][1][a[0]]}\nЭтап: ${Q[1][1][a[1]]}\nЦель: ${Q[2][1][a[2]]}\nБарьер: ${Q[11][1][a[11]]}`;
+$.innerHTML=`<div class="fade"><p class="mut">Ваш результат</p><div class="sc">${tot} из 16</div><h2>Уровень: ${LV[lv]}</h2><p>${LT[lv]}</p>${svg}<div class="lg">${keys.map(k=>`<span>${AX[k]}: ${k==w?`<b>${s[k]} из 4</b>`:`${s[k]} из 4`}</span>`).join("")}</div>
+<div class="sec"><h3>Главная точка роста: ${AX[w]}</h3><p>${t[0]}</p><p><b>На этой неделе:</b> ${t[1]}</p></div>
+<div class="sec"><h3>Ваш главный барьер</h3><p><i>${Q[11][1][a[11]]}.</i> ${BT[a[11]]}</p><p>${GL[a[2]]}</p></div>
+<div class="sec"><h3>Что поможет дальше</h3><p>${PR[w]}. Продукт в разработке: напишите мне, и я предложу вам ранний доступ.</p>
+<a class="btn go" target="_blank" rel="noopener" href="https://t.me/${TG}?text=${encodeURIComponent(msg)}">Получить разбор в Telegram</a>
+<p class="mut sm">Нажимая кнопку, вы отправляете этот результат мне в Telegram. Сообщение можно отредактировать перед отправкой.</p><button class="lnk" id="rs">Пройти заново</button></div></div>`;
+document.getElementById("rs").onclick=intro;
+window.scrollTo(0,0);
+}
+intro();
+</script>
+</body>
+</html>
